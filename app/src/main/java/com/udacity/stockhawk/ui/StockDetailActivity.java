@@ -1,6 +1,7 @@
 package com.udacity.stockhawk.ui;
 
 import android.database.Cursor;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.CursorLoader;
@@ -15,28 +16,35 @@ import android.widget.ArrayAdapter;
 import android.widget.Spinner;
 
 import com.github.mikephil.charting.charts.LineChart;
+import com.github.mikephil.charting.components.AxisBase;
+import com.github.mikephil.charting.components.Legend;
+import com.github.mikephil.charting.components.XAxis;
 import com.github.mikephil.charting.data.BarEntry;
 import com.github.mikephil.charting.data.Entry;
+import com.github.mikephil.charting.data.LineData;
+import com.github.mikephil.charting.data.LineDataSet;
+import com.github.mikephil.charting.formatter.IAxisValueFormatter;
 import com.github.mikephil.charting.interfaces.datasets.ILineDataSet;
 import com.udacity.stockhawk.R;
+import com.github.mikephil.charting.formatter.DefaultAxisValueFormatter;
+
 import com.udacity.stockhawk.data.Contract;
 
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 
 
 public class StockDetailActivity extends AppCompatActivity implements LoaderManager.LoaderCallbacks<Cursor> {
     private String symbol;
     private ArrayList<BarEntry> _stockList=new ArrayList<>();
-    private ArrayList<String>_dateDataList = new ArrayList<>();
+    private ArrayList<String> _xVals = new ArrayList<>();
     private LineChart _stockChart;
-    List<Entry> entries = new ArrayList<>();
+    List<Entry> _yVals = new ArrayList<>();
     List<Float> timeData = new ArrayList<>();
     List<Float> stockPrice = new ArrayList<>();
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -114,7 +122,6 @@ public class StockDetailActivity extends AppCompatActivity implements LoaderMana
                 String history = cursor.getString(cursor.getColumnIndexOrThrow(Contract.Quote.COLUMN_HISTORY));
                 String[] dataPairs = history.split("\n");
 
-
                 for(String data: dataPairs)
                 {
                     String splitData[] = data.split(",");
@@ -130,33 +137,56 @@ public class StockDetailActivity extends AppCompatActivity implements LoaderMana
                         String stringDate = String.valueOf(mYear)
                                 +"/"+ String.valueOf(mMonth)
                                 +"/"+String.valueOf(mDay);
+                    _xVals.add(stringDate);
 
-                        _dateDataList.add(stringDate);
 
                     Entry entry = new Entry(Float.valueOf(splitData[1]),Float.valueOf(splitData[0]));
-                    entries.add(entry);
+                    _yVals.add(entry);
                 }
 
 
 
             }
             while (cursor.moveToNext());
-       // LineDataSet dataSet = new LineDataSet(entries,"Lable...");
-       // _stockChart.sets
-//        ArrayList<ILineDataSet> sets = (ArrayList<ILineDataSet>) _stockChart.getData()
-//                .getDataSets();
-//        for (ILineDataSet set : sets) {
-//            set.setDrawFilled(true);
-//        }
+     setData();
 
-       // LineData data = new LineData(sets);
-       // _stockChart.setData(data);
-        _stockChart.animateXY(2000, 2000);
-       // LineData data = new LineData(getXAxisValues(),getDataSet());
 
-       // setUpChart(_stockChart, data);
+    }
+    private void setData() {
 
-        _stockChart.invalidate();
+
+        LineDataSet set1;
+
+        // create a dataset and give it a type
+        set1 = new LineDataSet(_yVals, "DataSet 1");
+        set1.setFillAlpha(110);
+        // set1.setFillColor(Color.RED);
+
+        // set the line to be drawn like this "- - - - - -"
+        // set1.enableDashedLine(10f, 5f, 0f);
+        // set1.enableDashedHighlightLine(10f, 5f, 0f);
+        set1.setColor(Color.BLACK);
+        set1.setCircleColor(Color.BLACK);
+        set1.setLineWidth(1f);
+        set1.setCircleRadius(3f);
+        set1.setDrawCircleHole(false);
+        set1.setValueTextSize(9f);
+        set1.setDrawFilled(true);
+
+
+        // create a data object with the datasets
+        LineData data = new LineData( set1);
+
+        // set data
+        XAxis xAxis = _stockChart.getXAxis();
+
+        xAxis.setValueFormatter(new StringValueFormatter(_xVals));
+        _stockChart.setData(data);
+        Legend l = _stockChart.getLegend();
+
+        // modify the legend ...
+        // l.setPosition(LegendPosition.LEFT_OF_CHART);
+        l.setForm(Legend.LegendForm.LINE);
 
     }
 
@@ -165,7 +195,20 @@ public class StockDetailActivity extends AppCompatActivity implements LoaderMana
     public void onLoaderReset(Loader<Cursor> loader) {
 
     }
+    public class StringValueFormatter implements IAxisValueFormatter {
 
+        private ArrayList<String> mValues;
+
+        public StringValueFormatter(ArrayList<String> values) {
+            this.mValues = values;
+        }
+
+        @Override
+        public String getFormattedValue(float value, AxisBase axis) {
+            // "value" represents the position of the label on the axis (x or y)
+            return mValues.get((int) value);
+        }
+    }
 
 
 
