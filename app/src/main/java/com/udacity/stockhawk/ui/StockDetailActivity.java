@@ -53,7 +53,9 @@ public class StockDetailActivity extends AppCompatActivity implements LoaderMana
 
 
         symbol = getIntent().getStringExtra("symbol");
-        getSupportLoaderManager().initLoader(1, null, this);
+        Bundle bundle = new Bundle();
+        bundle.putString("Symbol",symbol);
+        getSupportLoaderManager().initLoader(1, bundle, this);
 
 
     }
@@ -101,12 +103,13 @@ public class StockDetailActivity extends AppCompatActivity implements LoaderMana
         String[] projection = Contract.Quote.QUOTE_COLUMNS.toArray(new String[]{});
 
         String selection = Contract.Quote.COLUMN_SYMBOL + " = ?";
+        String SelectedSymbol= args.getString("Symbol");
 
-        String[] selectionArgs = new String[]{symbol};
+        String[] selectionArgs = new String[]{SelectedSymbol};
 
         return new CursorLoader(
                 this,
-                Contract.Quote.makeUriForStock(symbol), projection,
+                Contract.Quote.makeUriForStock(SelectedSymbol), projection,
                 null,
                 null,
                 null
@@ -121,7 +124,7 @@ public class StockDetailActivity extends AppCompatActivity implements LoaderMana
 
                 String history = cursor.getString(cursor.getColumnIndexOrThrow(Contract.Quote.COLUMN_HISTORY));
                 String[] dataPairs = history.split("\n");
-
+                int i=0;
                 for(String data: dataPairs)
                 {
                     String splitData[] = data.split(",");
@@ -140,7 +143,8 @@ public class StockDetailActivity extends AppCompatActivity implements LoaderMana
                     _xVals.add(stringDate);
 
 
-                    Entry entry = new Entry(Float.valueOf(splitData[1]),Float.valueOf(splitData[0]));
+                    Entry entry = new Entry(i,Float.valueOf(splitData[1]));
+                    ++i;
                     _yVals.add(entry);
                 }
 
@@ -155,27 +159,28 @@ public class StockDetailActivity extends AppCompatActivity implements LoaderMana
     private void setData() {
 
 
-        LineDataSet set1;
+        LineDataSet dataSet;
 
         // create a dataset and give it a type
-        set1 = new LineDataSet(_yVals, "DataSet 1");
-        set1.setFillAlpha(110);
-        // set1.setFillColor(Color.RED);
+        dataSet = new LineDataSet(_yVals, symbol);
+        dataSet.setFillAlpha(110);
+         dataSet.setFillColor(Color.WHITE);
 
         // set the line to be drawn like this "- - - - - -"
-        // set1.enableDashedLine(10f, 5f, 0f);
-        // set1.enableDashedHighlightLine(10f, 5f, 0f);
-        set1.setColor(Color.BLACK);
-        set1.setCircleColor(Color.BLACK);
-        set1.setLineWidth(1f);
-        set1.setCircleRadius(3f);
-        set1.setDrawCircleHole(false);
-        set1.setValueTextSize(9f);
-        set1.setDrawFilled(true);
+         dataSet.enableDashedLine(10f, 5f, 0f);
+         dataSet.enableDashedHighlightLine(10f, 5f, 0f);
+        dataSet.setColor(Color.BLUE);
+        dataSet.setCircleColor(Color.WHITE);
+        dataSet.setLineWidth(1f);
+        dataSet.setCircleRadius(3f);
+        dataSet.setDrawCircleHole(false);
+        dataSet.setValueTextSize(9f);
+        dataSet.setDrawFilled(true);
+        _stockChart.setDescription(null);
 
 
         // create a data object with the datasets
-        LineData data = new LineData( set1);
+        LineData data = new LineData( dataSet);
 
         // set data
         XAxis xAxis = _stockChart.getXAxis();
@@ -210,7 +215,26 @@ public class StockDetailActivity extends AppCompatActivity implements LoaderMana
         }
     }
 
+    private void getTimeBasedStocksList(int choice)
+    {
+        Calendar today = Calendar.getInstance();
+        Calendar choosedDate = Calendar.getInstance();
 
+        switch (choice)
+        {
+            case 0: // For One year stock data.
+//                choosedDate.s
+                break;
+            case 1: //For 6 Months
+                break;
+            case 2: // For One month
+                break;
+            case 3: //For one week
+                break;
+            default:
+
+        }
+    }
 
 
 
