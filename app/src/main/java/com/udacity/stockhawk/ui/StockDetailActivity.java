@@ -14,26 +14,35 @@ import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Spinner;
+import android.widget.Toast;
 
 import com.github.mikephil.charting.charts.LineChart;
 import com.github.mikephil.charting.components.AxisBase;
 import com.github.mikephil.charting.components.Legend;
 import com.github.mikephil.charting.components.XAxis;
+import com.github.mikephil.charting.components.YAxis;
 import com.github.mikephil.charting.data.BarEntry;
 import com.github.mikephil.charting.data.Entry;
 import com.github.mikephil.charting.data.LineData;
 import com.github.mikephil.charting.data.LineDataSet;
 import com.github.mikephil.charting.formatter.IAxisValueFormatter;
 import com.github.mikephil.charting.interfaces.datasets.ILineDataSet;
+import com.github.mikephil.charting.utils.ColorTemplate;
 import com.udacity.stockhawk.R;
 import com.github.mikephil.charting.formatter.DefaultAxisValueFormatter;
 
 import com.udacity.stockhawk.data.Contract;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.HashMap;
 import java.util.List;
+
+import yahoofinance.Stock;
+import yahoofinance.YahooFinance;
+import yahoofinance.histquotes.HistoricalQuote;
+import yahoofinance.histquotes.Interval;
 
 
 public class StockDetailActivity extends AppCompatActivity implements LoaderManager.LoaderCallbacks<Cursor> {
@@ -76,7 +85,7 @@ public class StockDetailActivity extends AppCompatActivity implements LoaderMana
 
                 switch (position) {
                     case 0:
-
+                        getTimeBasedStocksList(0);
                         break;
                     case 1:
 
@@ -100,6 +109,7 @@ public class StockDetailActivity extends AppCompatActivity implements LoaderMana
 
     @Override
     public Loader<Cursor> onCreateLoader(int id, Bundle args) {
+
         String[] projection = Contract.Quote.QUOTE_COLUMNS.toArray(new String[]{});
 
         String selection = Contract.Quote.COLUMN_SYMBOL + " = ?";
@@ -107,20 +117,35 @@ public class StockDetailActivity extends AppCompatActivity implements LoaderMana
 
         String[] selectionArgs = new String[]{SelectedSymbol};
 
+
         return new CursorLoader(
                 this,
                 Contract.Quote.makeUriForStock(SelectedSymbol), projection,
                 null,
                 null,
-                null
+                Contract.Quote._ID + " ASC LIMIT 2"
         );
     }
 
 
     @Override
     public void onLoadFinished(Loader<Cursor> loader, Cursor cursor) {
+//        Calendar to = Calendar.getInstance();
+//        Calendar from = Calendar.getInstance();
+//        Stock google = null;
+//        from.add(Calendar.YEAR, -1);
+//
+//        try {
+//            google = YahooFinance.get(symbol);
+//            List<HistoricalQuote> googleHistQuotes = google.getHistory(from, to, Interval.DAILY);
+//            Toast.makeText(this,"",Toast.LENGTH_SHORT).show();
+//
+//        } catch (IOException e) {
+//            e.printStackTrace();
+//        }
         if (cursor != null && cursor.moveToFirst())
             do {
+
 
                 String history = cursor.getString(cursor.getColumnIndexOrThrow(Contract.Quote.COLUMN_HISTORY));
                 String[] dataPairs = history.split("\n");
@@ -177,13 +202,42 @@ public class StockDetailActivity extends AppCompatActivity implements LoaderMana
         dataSet.setValueTextSize(9f);
         dataSet.setDrawFilled(true);
         _stockChart.setDescription(null);
+// - X Axis
+        XAxis xAxis = _stockChart.getXAxis();
+        //xAxis.setTypeface(tf);
+        xAxis.setTextSize(12f);
+        xAxis.setPosition(XAxis.XAxisPosition.BOTTOM);
+        xAxis.setTextColor(ColorTemplate.getHoloBlue());
+        xAxis.setEnabled(true);
+        xAxis.disableGridDashedLine();
+        xAxis.setSpaceMin(5);
+        xAxis.setDrawGridLines(false);
+        xAxis.setAvoidFirstLastClipping(true);
 
+// - Y Axis
+        YAxis leftAxis = _stockChart.getAxisLeft();
+        leftAxis.removeAllLimitLines();
+        //leftAxis.setTypeface(tf);//
+        leftAxis.setPosition(YAxis.YAxisLabelPosition.OUTSIDE_CHART);
+        leftAxis.setTextColor(ColorTemplate.getHoloBlue());
+        leftAxis.setAxisMaxValue(1000f);
+        leftAxis.setAxisMinValue(0f); // to set minimum yAxis
+        leftAxis.setStartAtZero(false);
+        leftAxis.enableGridDashedLine(10f, 10f, 0f);
+        leftAxis.setDrawLimitLinesBehindData(true);
+        leftAxis.setDrawGridLines(true);
+        _stockChart.getAxisRight().setEnabled(false);
+
+
+//-----------------
+        xAxis.setPosition(XAxis.XAxisPosition.BOTTOM);
+        leftAxis.setPosition(YAxis.YAxisLabelPosition.OUTSIDE_CHART);
 
         // create a data object with the datasets
         LineData data = new LineData( dataSet);
 
         // set data
-        XAxis xAxis = _stockChart.getXAxis();
+        //XAxis xAxis = _stockChart.getXAxis();
 
         xAxis.setValueFormatter(new StringValueFormatter(_xVals));
         _stockChart.setData(data);
@@ -217,13 +271,13 @@ public class StockDetailActivity extends AppCompatActivity implements LoaderMana
 
     private void getTimeBasedStocksList(int choice)
     {
-        Calendar today = Calendar.getInstance();
-        Calendar choosedDate = Calendar.getInstance();
+        Calendar to = Calendar.getInstance();
+        Calendar from = Calendar.getInstance();
 
         switch (choice)
         {
             case 0: // For One year stock data.
-//                choosedDate.s
+
                 break;
             case 1: //For 6 Months
                 break;
