@@ -135,6 +135,8 @@ public final class QuoteSyncJob {
         }
     }
 
+
+
     private static void schedulePeriodic(Context context) {
         Timber.d("Scheduling a periodic task");
 
