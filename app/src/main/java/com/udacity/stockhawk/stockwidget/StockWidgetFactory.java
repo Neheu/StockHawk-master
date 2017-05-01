@@ -33,13 +33,13 @@ public class StockWidgetFactory implements RemoteViewsService.RemoteViewsFactory
         if (_cursor != null) {
             _cursor.close();
         }
+        //get the data from database and to show on widget
         _cursor = _context.getContentResolver().query(Contract.Quote.CONTENT_URI,
                 Contract.Quote.QUOTE_COLUMNS.toArray(new String[]{}),
                 null,
                 null,
                 null);
     }
-
     @Override
     public void onDestroy() {
         if (_cursor != null) {
@@ -54,6 +54,7 @@ public class StockWidgetFactory implements RemoteViewsService.RemoteViewsFactory
 
     @Override
     public RemoteViews getViewAt(int position) {
+        //This will create the view remotely for the items to be showm on list of stocks
         RemoteViews rv = new RemoteViews(_context.getPackageName(), R.layout.list_item_quote);
         if (_cursor.moveToPosition(position)) {
             rv.setTextViewText(R.id.symbol,

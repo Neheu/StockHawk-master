@@ -10,11 +10,8 @@ import android.support.v4.view.MenuItemCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.View;
-import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Spinner;
-import android.widget.Toast;
 
 import com.github.mikephil.charting.charts.LineChart;
 import com.github.mikephil.charting.components.AxisBase;
@@ -26,22 +23,19 @@ import com.github.mikephil.charting.data.Entry;
 import com.github.mikephil.charting.data.LineData;
 import com.github.mikephil.charting.data.LineDataSet;
 import com.github.mikephil.charting.formatter.IAxisValueFormatter;
-import com.github.mikephil.charting.interfaces.datasets.ILineDataSet;
 import com.github.mikephil.charting.utils.ColorTemplate;
 import com.udacity.stockhawk.R;
-import com.github.mikephil.charting.formatter.DefaultAxisValueFormatter;
 
 import com.udacity.stockhawk.data.Contract;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.HashMap;
 import java.util.List;
 
 
 public class StockDetailActivity extends AppCompatActivity implements LoaderManager.LoaderCallbacks<Cursor> {
     private String symbol;
+    private final static  int LOADER_ID=101;
     private ArrayList<BarEntry> _stockList = new ArrayList<>();
     private ArrayList<String> _xVals = new ArrayList<>();
     private LineChart _stockChart;
@@ -57,9 +51,9 @@ public class StockDetailActivity extends AppCompatActivity implements LoaderMana
         _stockChart = (LineChart) findViewById(R.id.chart);
 
 
-        symbol = getIntent().getStringExtra("symbol");
-
-        getSupportLoaderManager().initLoader(1, bundle, this);
+        symbol = getIntent().getStringExtra(getString(R.string.intent_key_symbol));
+        setTitle(symbol);
+        getSupportLoaderManager().initLoader(LOADER_ID, bundle, this);
 
 
     }
@@ -74,36 +68,36 @@ public class StockDetailActivity extends AppCompatActivity implements LoaderMana
         ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(this,
                 R.array.sort_time_intervals, R.layout.spinner_text_item);
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-            @Override
-            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-
-                switch (position) {
-                    case 0:
-                        bundle.putInt("choice", 0);
-                        getSupportLoaderManager().initLoader(1, bundle, StockDetailActivity.this);
-
-
-                        break;
-                    case 1:
-                        bundle.putInt("choice", 1);
-                        getSupportLoaderManager().initLoader(1, bundle, StockDetailActivity.this);
-
-                        break;
-                    case 2:
-                        bundle.putInt("choice", 2);
-                        getSupportLoaderManager().initLoader(1, bundle, StockDetailActivity.this);
-
-
-                }
-            }
-
-            @Override
-            public void onNothingSelected(AdapterView<?> parent) {
-
-            }
-        });
-        spinner.setAdapter(adapter);
+//        spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+//            @Override
+//            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+//
+//                switch (position) {
+//                    case 0:
+//                        bundle.putInt("choice", 0);
+//                        getSupportLoaderManager().initLoader(1, bundle, StockDetailActivity.this);
+//
+//
+//                        break;
+//                    case 1:
+//                        bundle.putInt("choice", 1);
+//                        getSupportLoaderManager().initLoader(1, bundle, StockDetailActivity.this);
+//
+//                        break;
+//                    case 2:
+//                        bundle.putInt("choice", 2);
+//                        getSupportLoaderManager().initLoader(1, bundle, StockDetailActivity.this);
+//
+//
+//                }
+//            }
+//
+//            @Override
+//            public void onNothingSelected(AdapterView<?> parent) {
+//
+//            }
+//        });
+//        spinner.setAdapter(adapter);
 
         return true;
     }
@@ -125,8 +119,7 @@ public class StockDetailActivity extends AppCompatActivity implements LoaderMana
 
     @Override
     public void onLoadFinished(Loader<Cursor> loader, Cursor cursor) {
-        float minimumPrice = Float.MAX_VALUE;
-        float maximumPrice = Float.MIN_VALUE;
+
         float price = 0f;
 
         if (cursor != null && cursor.moveToFirst())
@@ -161,17 +154,16 @@ public class StockDetailActivity extends AppCompatActivity implements LoaderMana
             }
             while (cursor.moveToNext());
 
-        setData(price);
+        renderChart(price);
 
 
     }
 
-    private void setData(float price) {
+    private void renderChart(float price) {
 
 
         LineDataSet dataSet;
 
-        // create a dataset and give it a type
         dataSet = new LineDataSet(_yVals, symbol);
         dataSet.setFillAlpha(110);
         dataSet.setFillColor((Color.parseColor("#2d374c")));
@@ -209,7 +201,6 @@ public class StockDetailActivity extends AppCompatActivity implements LoaderMana
         //leftAxis.setTypeface(tf);//
         leftAxis.setPosition(YAxis.YAxisLabelPosition.OUTSIDE_CHART);
         leftAxis.setTextColor(ColorTemplate.getHoloBlue());
-        leftAxis.setStartAtZero(false);
         leftAxis.enableGridDashedLine(10f, 10f, 0f);
         leftAxis.setDrawLimitLinesBehindData(true);
         leftAxis.setDrawGridLines(true);

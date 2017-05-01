@@ -13,6 +13,7 @@ import android.os.Looper;
 import android.support.design.widget.Snackbar;
 import android.widget.Toast;
 
+import com.udacity.stockhawk.R;
 import com.udacity.stockhawk.data.Contract;
 import com.udacity.stockhawk.data.PrefUtils;
 
@@ -131,14 +132,14 @@ public final class QuoteSyncJob {
             context.sendBroadcast(dataUpdatedIntent);
 
         } catch (IOException exception) {
-            Timber.e(exception, "Error fetching stock quotes");
+            Timber.e(exception, context.getResources().getString(R.string.error_fething_stock_quote));
         }
     }
 
 
 
     private static void schedulePeriodic(Context context) {
-        Timber.d("Scheduling a periodic task");
+        Timber.d(context.getString(R.string.scheduling_preodic_task));
 
 
         JobInfo.Builder builder = new JobInfo.Builder(PERIODIC_ID, new ComponentName(context, QuoteJobService.class));
