@@ -40,7 +40,14 @@ public final class Contract {
                 COLUMN_HISTORY
         );
         static final String TABLE_NAME = "quotes";
-
+        public static final Uri CONTENT_URI = buildUri(PATH_QUOTE);
+        private static Uri buildUri(String... paths) {
+            Uri.Builder builder = BASE_URI.buildUpon();
+            for (String path : paths) {
+                builder.appendPath(path);
+            }
+            return builder.build();
+        }
         public static Uri makeUriForStock(String symbol) {
             return URI.buildUpon().appendPath(symbol).build();
         }

@@ -216,7 +216,7 @@ public class StockDetailActivity extends AppCompatActivity implements LoaderMana
         leftAxis.setAxisMaximum(price);
         _stockChart.getAxisRight().setEnabled(false);
 
-        _stockChart.setVisibleXRangeMaximum(10);
+        xAxis.setLabelRotationAngle(90);
 
 
 //-----------------
